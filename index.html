@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Information</title>
+    <link rel="stylesheet" href="bootstrap-5.3.2-dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5efef; /* Set background color to black */
+            color: #f36161; /* Set text color to white */
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            color: #433c3c;
+            padding: 20px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        #flight-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .flight-card {
+            background-color: #e49191; /* Dark gray background for flight cards */
+            border: 2px solid #d98484;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(208, 127, 127, 0.2);
+            margin: 20px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .flight-card:hover {
+            transform: scale(1.05);
+        }
+
+        .flight-card h2 {
+            color:#433c3c;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .flight-card p {
+            margin: 10px 0;
+            color: #433c3c; /* Light gray text color for additional information */
+        }
+
+        /* Filter and Sort Controls */
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+
+        button {
+            background-color: #3a3d40;
+            color: #ebabab;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        select {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Flight Information</h1>
+    </header>
+    <div class="controls">
+        <label for="destination">Filter by Destination:</label>
+        <select id="destination">
+            <option value="">All</option>
+            <option value="New York">New York</option>
+            <option value="Los Angeles">Los Angeles</option>
+            <option value="Chicago">Chicago</option>
+        </select>
+        <button id="sort-button">Sort by Departure Time</button>
+        <button id="clear-button">Clear Flights</button>
+    </div>
+    <div class="controls">
+        <h2>Add New Flight</h2>
+        <label for="flightNumber">Flight Number:</label>
+        <input type="text" id="flightNumber" placeholder="Flight Number">
+        <label for="destination">Destination:</label>
+        <input type="text" id="newDestination" placeholder="Destination">
+        <label for="departureTime">Departure Time:</label>
+        <input type="text" id="newDepartureTime" placeholder="HH:MM AM/PM">
+        <label for="gate">Gate:</label>
+        <input type="text" id="newGate" placeholder="Gate">
+        <button id="add-button">Add Flight</button>
+    </div>
+    <div id="flight-info"></div>
+
+    <script>
+        // Sample JSON data for flights
+        let flights = [
+            {
+                "flightNumber": "AA123",
+                "destination": "New York",
+                "departureTime": "09:00 AM",
+                "gate": "A3"
+            },
+            {
+                "flightNumber": "DL456",
+                "destination": "Los Angeles",
+                "departureTime": "10:30 AM",
+                "gate": "B2"
+            },
+            {
+                "flightNumber": "UA789",
+                "destination": "Chicago",
+                "departureTime": "12:15 PM",
+                "gate": "C1"
+            }
+        ];
+
+        // Function to display flight information
+        function displayFlightInfo(flightsData) {
+            const flightInfoContainer = document.getElementById('flight-info');
+            flightInfoContainer.innerHTML = '';
+
+            flightsData.forEach(flight => {
+                const flightDiv = document.createElement('div');
+                flightDiv.classList.add('flight-card');
+                flightDiv.innerHTML = `
+                    <h2>${flight.flightNumber}</h2>
+                    <p><strong>Destination:</strong> ${flight.destination}</p>
+                    <p><strong>Departure Time:</strong> ${flight.departureTime}</p>
+                    <p><strong>Gate:</strong> ${flight.gate}</p>
+                `;
+                flightInfoContainer.appendChild(flightDiv);
+            });
+        }
+
+        // Initial display of flights
+        displayFlightInfo(flights);
+
+        // Filter flights by destination
+        document.getElementById('destination').addEventListener('change', function () {
+            const selectedDestination = this.value;
+            const filteredFlights = selectedDestination
+                ? flights.filter(flight => flight.destination === selectedDestination)
+                : flights;
+            displayFlightInfo(filteredFlights);
+        });
+
+        // Sort flights by departure time
+        document.getElementById('sort-button').addEventListener('click', function () {
+            const sortedFlights = [...flights];
+            sortedFlights.sort((a, b) => {
+                const timeA = new Date(`01/01/2021 ${a.departureTime}`);
+                const timeB = new Date(`01/01/2021 ${b.departureTime}`);
+                return timeA - timeB;
+            });
+            displayFlightInfo(sortedFlights);
+        });
+
+        // Clear displayed flights
+        document.getElementById('clear-button').addEventListener('click', function () {
+            flights = [];
+            displayFlightInfo(flights);
+        });
+
+        // Add a new flight
+        document.getElementById('add-button').addEventListener('click', function () {
+            const flightNumber = document.getElementById('flightNumber').value;
+            const destination = document.getElementById('newDestination').value;
+            const departureTime = document.getElementById('newDepartureTime').value;
+            const gate = document.getElementById('newGate').value;
+
+            if (flightNumber && destination && departureTime && gate) {
+                const newFlight = {
+                    "flightNumber": flightNumber,
+                    "destination": destination,
+                    "departureTime": departureTime,
+                    "gate": gate
+                };
+
+                flights.push(newFlight);
+                displayFlightInfo(flights);
+
+                // Clear input fields
+                document.getElementById('flightNumber').value = '';
+                document.getElementById('newDestination').value = '';
+                document.getElementById('newDepartureTime').value = '';
+                document.getElementById('newGate').value = '';
+            }
+        });
+    </script>
+</body>
+</html>
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="triggerId" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
+                Dropdown
+            </button>
+    <div class="dropdown-menu" aria-labelledby="triggerId">
+        <a class="dropdown-item" href="#">Action</a>
+        <a class="dropdown-item disabled" href="#">Disabled action</a>
+        <h6 class="dropdown-header">Section header</h6>
+        <a class="dropdown-item" href="#">Action</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="#">After divider action</a>
+    </div>
+</div>
+<div class="form-check">
+    <label class="form-check-label">
+    <input type="radio" class="form-check-input" name="" id="" value="checkedValue" checked>
+    Display value
+  </label>
+</div>
+<div class="container-fluid">
+    b
+</div>
+<div class="col-xs-1-12">
+    
+</div>
+<nav class="nav nav-tabs nav-stacked">
+    <a class="nav-link active" href="#">Active link</a>
+    <a class="nav-link" href="#">Link</a>
+    <a class="nav-link disabled" href="#">Disabled link</a>
+</nav>
+<input name="" id="" class="btn btn-primary" type="button" value="">
+<div class="row">
+  <div class="col-xs-1-12">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">Title</h3>
+        <p class="card-text">Text</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-xs-1-12">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">Title</h3>
+        <p class="card-text">Text</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="form-check">
+  <label class="form-check-label">
+    <input type="checkbox" class="form-check-input" name="" id="" value="checkedValue" checked>
+    Display value
+  </label>
+</div>
+<div class="mb-3">
+  <label for="" class="form-label">Password</label>
+  <input type="password" class="form-control" name="" id="" placeholder="">
+</div>
+<button class="btn">
+        Notification <span class="badge badge-primary"></span>
+</button>
